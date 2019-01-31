@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
 import random
-import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -21,7 +20,7 @@ def getAccounts():
 		line = line[:-1]
 		if line != '':
 			accounts.append(line.split(' '))
-	print 'console>Get '+str(len(accounts))+' accounts'
+	print '[STVEAtrainNike]>Get '+str(len(accounts))+' accounts'
 	return delay_time,accounts
 
 
@@ -55,7 +54,6 @@ def printRights():
 
 printRights()
 delay_time,accounts = getAccounts()
-
 for accounts_num in range(len(accounts)):
 
 	username = accounts[accounts_num][0]
@@ -64,18 +62,21 @@ for accounts_num in range(len(accounts)):
 
 	chrome_options = webdriver.ChromeOptions()
 	chrome_options.add_argument('--headless')
-	driver = webdriver.Chrome(chrome_options=chrome_options)
+	chrome_options.add_argument('--log-level=2')
+	prefs = {"profile.managed_default_content_settings.images":2}
+	chrome_options.add_experimental_option("prefs",prefs)
+	driver = webdriver.Chrome(chrome_options=chrome_options,executable_path='chromedriver.exe')
 	driver.get("https://store.nike.com/cn/zh_cn/pw/mens-shoes/7puZoi3")
 
 	login_href = driver.find_element_by_css_selector("[class='js-rootItem js-navItem']")
 	login_href.click()
 
 	if isEmail:
-		print "console>A new account username:"+username+" using Email"
+		print "[STVEAtrainNike]>A new account username:"+username+" using Email"
 		driver.find_element_by_link_text('使用电子邮件登录。').click()
 		login_username = "emailAddress"
 	else:
-		print "console>A new account username:"+username+" using Mobile"
+		print "[STVEAtrainNike]>A new account username:"+username+" using Mobile"
 		login_username = "verifyMobileNumber"
 
 	driver.find_element_by_name(login_username).send_keys(username)
@@ -86,14 +87,14 @@ for accounts_num in range(len(accounts)):
 
 	new_shoes = driver.find_elements_by_css_selector("[class='grid-item-image-wrapper sprite-sheet sprite-index-0']")
 	random.shuffle(new_shoes)
-
+	print "[STVEAtrainNike]>Have "+str(len(new_shoes))+" items."
 	for i in range(len(new_shoes)):
 		href = new_shoes[i].find_element_by_tag_name('a').get_attribute("href")
 		js='window.open("'+href+'");'
 		driver.execute_script(js)
 		windows = driver.window_handles
 		driver.switch_to.window(windows[1])
-		print username+">Browse shoes:"+driver.title.replace(u'\xa0', u'')
+		print username+">Browse shoes:["+driver.title.replace(u'\xa0', u'')+"]"
 		time.sleep(delay_time)
 		driver.close()
 		driver.switch_to.window(windows[0])
